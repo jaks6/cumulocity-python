@@ -144,6 +144,21 @@ class C8yDevice():
         resp = requests.get(request_url, auth=self.auth)
         return resp.status_code == 200
 
+    def child_exists_with_name(self, name):
+        request_url = self.cumu_url + '/inventory/managedObjects/' + self.device_info['id']
+        resp = requests.get(request_url, auth=self.auth)
+
+        if resp.status_code == 200:
+            children = resp.json()["childDevices"]["references"]
+            for child in children:
+                if child["managedObject"]["name"] == name:
+                    return child["managedObject"]["id"]
+            return None
+        else:
+            print "[e] Error fetching device info ", resp.text
+
+
+
 
     def register_device(self):
         request_url = self.cumu_url + 'identity/globalIds/' + self.device_info["id"] + '/externalIds'
@@ -198,7 +213,8 @@ class C8yDevice():
         else:
             print "[e] Could not send measurement: ", resp.text
 
-    ''' Create Child Device and link it to this device '''
+    ''' Create Child Device and link it to this device.
+     Returns child ID if succesfully created'''
     def spawn_child_device(self, name, supported_measurements):
         url = self.cumu_url + "/inventory/managedObjects"
         headers = {
@@ -208,6 +224,7 @@ class C8yDevice():
 
         data = {
             "name": name,
+            "serial": name,
             "c8y_SupportedMeasurements": supported_measurements
         }
 
@@ -216,6 +233,8 @@ class C8yDevice():
             child_id = resp.json()["id"]
             print "[i] Created child: ", child_id
             self.child_ids.append(child_id)
+
+
         else:
             print "[e] Error creating child: ", resp.text
             return
@@ -227,12 +246,18 @@ class C8yDevice():
         resp = requests.post(url, auth=self.auth, data=json.dumps(data), headers=headers)
         if resp.status_code == 201:
             print "[i] Linked child: ", child_id
+            return child_id
         else:
             print "[e] Error linking child: ", resp.text
 
     def get_children(self):
         url = self.device_info["childDevices"]["self"]
-        return requests.get(url, auth=self.auth)
+        resp = requests.get(url, auth=self.auth)
+        if resp.status_code == 201:
+            return resp.json()["id"]
+        else:
+            print "[e] Error fetching children", resp.text
+
 
     def update_deviceinfo(self):
         url = self.device_info["self"]

@@ -1,0 +1,17 @@
+{ "slaves" : [
+  {
+    "id" : "slave1",
+    "address" : 1,
+    "registers" : [
+      {
+        "name" : "Temperature (Celsius)",
+        "address" : 1,
+        "count" : 2,
+        "raw_type" : "ieee32bitfloat",
+        "c8y_type" : "c8y_TemperatureMeasurement"
+      }
+      ],
+    "coils" : [],
+    "functions" : []
+  }
+]}

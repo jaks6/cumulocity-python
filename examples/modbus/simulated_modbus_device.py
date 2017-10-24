@@ -12,14 +12,6 @@ TENANT_ID = "testing"
 
 MODBUS_TEMPLATE = "./modbus.json"
 
-agent = Agent(MODBUS_TEMPLATE, CUMU_URL, TENANT_ID)
-agent.name = "ModbusPal Agent"
-agent.serial_no = "modbuspal"
-
-
-agent.modbus_client.connect()
-
-
 def send_register_measurement(value, slave, register):
     request_url = agent.cumu_url + "/measurement/measurements"
     headers = c8y_http.HEADER_MEASUREMENT_JSON
@@ -43,25 +35,18 @@ def send_register_measurement(value, slave, register):
         print "[e] Could not send measurement: ", resp.text
 
 
-def parse_ieee32bitfloat(result):
-    msw = result.registers[0]
-    lsw = result.registers[1]
-    # 32-bit IEEE floating point number as used by ModbusPal:
-    # 1 bit sign + 8 bits exponent + 23 bits fraction
-    float32 = (msw << 16) + lsw
-    # simple way of getting the value in human readable form:
-    return struct.unpack('f', struct.pack('I', float32))[0]
+if __name__ == '__main__':
+    agent = Agent(MODBUS_TEMPLATE, CUMU_URL, TENANT_ID)
+    agent.name = "ModbusPal Agent"
+    agent.serial_no = "modbuspal"
 
+    agent.modbus_client.open_connection()
 
-for slave in agent.slaves:
-    for register in slave.registers:
+    for slave in agent.slaves:
+        for register in slave.registers:
+            count = register.count
 
-        address = register.address
-        count = register.count
+            result = agent.modbus_client.read_holdingregister_float32(slave.address, register.address)
+            send_register_measurement(result, slave, register)
 
-        result = agent.modbus_client.read_holding_registers(address=address-1, count=count, unit=slave.address)
-        assert (result.function_code < 0x80)  # test that we are not an error
-
-        value = parse_ieee32bitfloat(result)
-        send_register_measurement(value, slave, register)
-
+    agent.modbus_client.close_connection()

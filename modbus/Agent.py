@@ -16,7 +16,7 @@ class Agent(C8yDevice):
         self.name = "MODBUS Agent"
         self.slaves = []
         self.modbus_conf = {}
-        self.modbus_client = ModbusClient('localhost', 502).client
+        self.modbus_client = ModbusClient('localhost', 502)
 
 
         self.bootstrap()

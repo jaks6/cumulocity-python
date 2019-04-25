@@ -3,6 +3,10 @@ HEADER_MEASUREMENT_JSON = {
     "Accept": "application/vnd.com.nsn.cumulocity.measurement+json",
 }
 
+HEADER_GENERIC_JSON = {
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+}
 
 HEADER_EXTERNAL_ID_JSON = {
     "Content-Type": "application/vnd.com.nsn.cumulocity.externalId+json",

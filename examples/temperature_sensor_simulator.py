@@ -2,7 +2,7 @@ import datetime
 import time
 from random import random
 
-from c8y import C8yDevice
+from c8y.device import C8yDevice
 
 
 class SimulatedSensor(C8yDevice):

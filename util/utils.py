@@ -34,7 +34,7 @@ def printbits(bits):
             result += '1'
         else:
             result += '0'
-    print result
+    print(result)
 
 
 def mantissa(float32):

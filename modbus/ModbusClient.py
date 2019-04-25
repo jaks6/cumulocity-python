@@ -38,7 +38,7 @@ class ModbusClient():
         float32 = (msw << 16) + lsw
         value = struct.unpack('f', struct.pack('I', float32))[0]
 
-        print "read float32 value:", value
+        print("read float32 value:", value)
         return value
 
 class Slave():

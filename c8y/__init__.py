@@ -5,7 +5,7 @@ import os
 import requests
 import platform
 import time
-import c8y_http
+from . import c8y_http
 import util.utils as utils
 
 C8Y_BOOTSTRAP_AUTH = ('management/devicebootstrap', 'Fhdt1bb1f')
@@ -39,14 +39,14 @@ class C8yDevice():
     def update_c8y_inventory(self):
         # Is Device registered?
         if not self.device_registered():
-            print "[i] Registering self..."
+            print("[i] Registering self...")
             response = self.create_device()
             if response is not None:
                 self.device_info = response.json()
                 utils.write_to_file(response.json(), self.DEVICE_JSON)
                 self.register_device()
         else:
-            print "[i] Device already registered..."
+            print("[i] Device already registered...")
             self.device_info = utils.load_json_file(self.DEVICE_JSON)
             # self.update_device_in_inventory()
 
@@ -56,14 +56,14 @@ class C8yDevice():
             while True:
                 response = self.request_credentials()
                 if response is not None:
-                    print "[!] Writing Device credentials to file... ", self.CREDENTIALS_FILE
+                    print("[!] Writing Device credentials to file... ", self.CREDENTIALS_FILE)
                     utils.write_to_file(response.json(), self.CREDENTIALS_FILE)
                     break
                 else:
-                    print "[d] Trying again in 3 seconds..."
+                    print("[d] Trying again in 3 seconds...")
                     time.sleep(3)
         else:
-            print "[i] Using existing credentials file: ", self.CREDENTIALS_FILE
+            print("[i] Using existing credentials file: ", self.CREDENTIALS_FILE)
 
         # create Auth object from file
         return self.load_auth_from_file()
@@ -84,14 +84,14 @@ class C8yDevice():
                              headers=headers)
 
         if resp.status_code == 201:
-            print "[i] Received Device credentials: ", resp.text
+            print("[i] Received Device credentials: ", resp.text)
             return resp
 
         elif resp.status_code == 404:
-            print "[e] 404 - Unable to get credentials. " \
-                  "Have you registered and accepted the new device (id: "+ self.serial_no + ") in Cumulocity Device Management?"
+            print("[e] 404 - Unable to get credentials. " \
+                  "Have you registered and accepted the new device (id: "+ self.serial_no + ") in Cumulocity Device Management?")
         else:
-            print "[e] Unable to get credentials: ", resp.status_code, resp.json()
+            print("[e] Unable to get credentials: ", resp.status_code, resp.json())
         return None
 
 
@@ -131,11 +131,11 @@ class C8yDevice():
         resp = requests.post(request_url, auth=self.auth, data=json.dumps(data), headers=headers)
 
         if resp.status_code == 201:
-            print "[i] Created Device: ", resp.text
+            print("[i] Created Device: ", resp.text)
             return resp
 
         else:
-            print "[e] Unable to create Device: ", resp.status_code, resp.json()
+            print("[e] Unable to create Device: ", resp.status_code, resp.json())
             return None
 
 
@@ -155,7 +155,7 @@ class C8yDevice():
                     return child["managedObject"]["id"]
             return None
         else:
-            print "[e] Error fetching device info ", resp.text
+            print("[e] Error fetching device info ", resp.text)
 
 
 
@@ -171,10 +171,10 @@ class C8yDevice():
 
         resp = requests.post(request_url, auth=self.auth, data=json.dumps(data), headers=headers)
         if resp.status_code == 201:
-            print "[i] Registered Device: ", resp.text
+            print("[i] Registered Device: ", resp.text)
         else:
-            print "[e] Unable to register Device: ", resp.status_code
-            print resp.text
+            print("[e] Unable to register Device: ", resp.status_code)
+            print(resp.text)
 
     def send_measurement(self, data):
         request_url = self.cumu_url + "/measurement/measurements"
@@ -182,10 +182,10 @@ class C8yDevice():
 
         resp = requests.post(request_url, auth=self.auth, data=json.dumps(data), headers=headers)
         if resp.status_code == 201:
-            print "[i] Sent measurement: ", resp.text
+            print("[i] Sent measurement: ", resp.text)
         else:
-            print "[e] Unable to send measurement: ", resp.status_code
-            print resp.text
+            print("[e] Unable to send measurement: ", resp.status_code)
+            print(resp.text)
 
 
     ## todo remove this next method
@@ -209,9 +209,9 @@ class C8yDevice():
 
         resp = requests.post(request_url, auth=self.auth, data=json.dumps(data), headers=headers)
         if resp.status_code == 201:
-            print "[i] Sent measurement: ", resp.text
+            print("[i] Sent measurement: ", resp.text)
         else:
-            print "[e] Could not send measurement: ", resp.text
+            print("[e] Could not send measurement: ", resp.text)
 
     ''' Create Child Device and link it to this device.
      Returns child ID if succesfully created'''
@@ -231,12 +231,12 @@ class C8yDevice():
         resp = requests.post(url, auth=self.auth, data=json.dumps(data), headers=headers)
         if resp.status_code == 201:
             child_id = resp.json()["id"]
-            print "[i] Created child: ", child_id
+            print("[i] Created child: ", child_id)
             self.child_ids.append(child_id)
 
 
         else:
-            print "[e] Error creating child: ", resp.text
+            print("[e] Error creating child: ", resp.text)
             return
 
 
@@ -245,10 +245,10 @@ class C8yDevice():
         data = { "managedObject": {"id": child_id} }
         resp = requests.post(url, auth=self.auth, data=json.dumps(data), headers=headers)
         if resp.status_code == 201:
-            print "[i] Linked child: ", child_id
+            print("[i] Linked child: ", child_id)
             return child_id
         else:
-            print "[e] Error linking child: ", resp.text
+            print("[e] Error linking child: ", resp.text)
 
     def get_children(self):
         url = self.device_info["childDevices"]["self"]
@@ -256,7 +256,7 @@ class C8yDevice():
         if resp.status_code == 201:
             return resp.json()["id"]
         else:
-            print "[e] Error fetching children", resp.text
+            print("[e] Error fetching children", resp.text)
 
 
     def update_deviceinfo(self):

@@ -30,9 +30,9 @@ def send_register_measurement(value, slave, register):
     }
     resp = requests.post(request_url, auth=agent.auth, data=json.dumps(data), headers=headers)
     if resp.status_code == 201:
-        print "[i] Sent measurement: ", resp.text
+        print("[i] Sent measurement: ", resp.text)
     else:
-        print "[e] Could not send measurement: ", resp.text
+        print("[e] Could not send measurement: ", resp.text)
 
 
 if __name__ == '__main__':
